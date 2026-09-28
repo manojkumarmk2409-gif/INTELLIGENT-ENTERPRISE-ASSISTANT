@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Enterprise Assistant | AI-Driven Knowledge Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="dark-theme">
+    <!-- Background glow ambient effects -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <div class="app-layout">
+        <!-- Top Navigation Bar -->
+        <header class="navbar">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-brain-circuit"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Enterprise AI Assistant</h1>
+                    <span class="brand-tagline">Intelligent Document Intelligence & RAG Chatbot</span>
+                </div>
+            </div>
+
+            <div class="nav-metrics">
+                <div class="metric-chip">
+                    <span class="indicator-dot online"></span>
+                    <span class="metric-label">LLM Engine:</span>
+                    <span class="metric-val" id="systemStatus">Ollama (gemma3)</span>
+                </div>
+                <div class="metric-chip">
+                    <i class="fa-solid fa-lock" style="color: #34d399;"></i>
+                    <span class="metric-val" style="color: #6ee7b7;">100% Local / Offline</span>
+                </div>
+                <div class="metric-chip">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span class="metric-label">Docs:</span>
+                    <span class="metric-val" id="navDocCount">0</span>
+                </div>
+                <div class="metric-chip">
+                    <i class="fa-solid fa-cubes"></i>
+                    <span class="metric-label">Chunks:</span>
+                    <span class="metric-val" id="navChunkCount">0</span>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-secondary btn-sm" id="btnApiDocs">
+                    <i class="fa-solid fa-code"></i> API Spec
+                </button>
+                <button class="btn btn-danger-ghost btn-sm" id="btnClearIndex" title="Clear all indexed documents">
+                    <i class="fa-solid fa-trash-can"></i> Reset
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Container -->
+        <main class="workspace-grid">
+            
+            <!-- Left Sidebar: Documents & Knowledge Center -->
+            <aside class="sidebar-panel">
+                
+                <!-- PDF Upload Box -->
+                <section class="card upload-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-cloud-arrow-up icon-accent"></i>
+                            <h2>Document Ingestion</h2>
+                        </div>
+                        <span class="badge badge-indigo">RAG Pipeline</span>
+                    </div>
+                    
+                    <div class="upload-dropzone" id="dropzone">
+                        <input type="file" id="pdfFileInput" accept=".pdf,.txt" class="file-input-hidden" />
+                        <div class="dropzone-content">
+                            <div class="upload-icon-wrapper">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            <p class="drop-text">Drag & drop your PDF here</p>
+                            <span class="drop-subtext">or click to browse from device</span>
+                            <button type="button" class="btn btn-secondary btn-sm browse-btn" onclick="document.getElementById('pdfFileInput').click()">
+                                <i class="fa-solid fa-folder-open"></i> Choose PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Instant Sample Loader -->
+                    <div class="sample-loader-box">
+                        <div class="divider-text"><span>OR QUICK START</span></div>
+                        <button class="btn btn-gradient-secondary btn-block" id="btnLoadSample">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Project Report
+                        </button>
+                    </div>
+
+                    <!-- Upload / Processing Progress -->
+                    <div class="progress-container hidden" id="uploadProgressContainer">
+                        <div class="progress-info">
+                            <span id="progressMessage"><i class="fa-solid fa-spinner fa-spin"></i> Processing PDF & generating embeddings...</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Active Document Banner -->
+                    <div class="active-doc-banner hidden" id="activeDocBanner">
+                        <div class="doc-icon-mini"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="doc-details">
+                            <span class="doc-name" id="activeDocName">sample.pdf</span>
+                            <span class="doc-status" id="activeDocStats">Ready for Q&A</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Document Summary Hub -->
+                <section class="card summary-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-file-lines icon-accent"></i>
+                            <h2>Executive Summary</h2>
+                        </div>
+                        <button class="btn btn-xs btn-outline" id="btnRefreshSummary" title="Generate / Refresh Summary">
+                            <i class="fa-solid fa-rotate-right"></i> Summarize
+                        </button>
+                    </div>
+
+                    <div class="summary-body" id="summaryBody">
+                        <div class="empty-state-card" id="summaryEmptyState">
+                            <i class="fa-solid fa-newspaper empty-icon"></i>
+                            <p>Upload a document or load the sample report to generate an instant executive summary.</p>
+                        </div>
+                        <div class="summary-content hidden" id="summaryContent">
+                            <div class="tldr-box">
+                                <span class="tldr-label"><i class="fa-solid fa-bolt"></i> Key Takeaway:</span>
+                                <p id="summaryTldr"></p>
+                            </div>
+                            
+                            <div class="summary-highlights">
+                                <h4><i class="fa-solid fa-list-check"></i> Document Highlights:</h4>
+                                <ul id="summaryKeyPoints" class="highlight-list"></ul>
+                            </div>
+
+                            <div class="summary-stats-bar">
+                                <span><i class="fa-solid fa-font"></i> Words: <b id="summaryWordCount">0</b></span>
+                                <span><i class="fa-solid fa-cubes"></i> Chunks: <b id="summaryChunkCount">0</b></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Indexed Documents List -->
+                <section class="card doc-list-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-solid fa-database icon-accent"></i>
+                            <h2>Vector Knowledge Base</h2>
+                        </div>
+                        <span class="badge badge-gray" id="kbDocBadge">0 Docs</span>
+                    </div>
+                    <div class="doc-list-container" id="docListContainer">
+                        <p class="empty-hint" id="noDocsHint">No documents indexed in FAISS memory yet.</p>
+                        <div class="doc-items-wrapper" id="docItemsWrapper"></div>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Right Main Area: AI Chat & Intelligent Q&A -->
+            <section class="chat-panel card">
+                
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="chat-title-group">
+                        <div class="assistant-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <h3>Enterprise AI Copilot</h3>
+                            <p class="chat-subtitle">Ask questions based on your ingested documents with semantic citation matching</p>
+                        </div>
+                    </div>
+                    <div class="chat-tools">
+                        <button class="btn btn-ghost btn-sm" id="btnClearChat" title="Clear conversation">
+                            <i class="fa-solid fa-broom"></i> Clear Chat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Message Stream -->
+                <div class="chat-messages" id="chatMessages">
+                    
+                    <!-- Welcome Initial Message -->
+                    <div class="message assistant-message intro-message">
+                        <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div class="msg-body">
+                            <div class="msg-header">
+                                <span class="sender-name">Enterprise Assistant</span>
+                                <span class="msg-time">Just now</span>
+                            </div>
+                            <div class="msg-text">
+                                <p>Welcome! I am your <strong>Intelligent Enterprise Assistant</strong>. I can analyze complex enterprise documents, generate executive summaries, and answer technical or operational questions with source citations.</p>
+                                <p>Get started by uploading a PDF document on the left or click <strong>Load Sample Project Report</strong>.</p>
+                            </div>
+                            
+                            <!-- Prompt Starters -->
+                            <div class="prompt-starters">
+                                <span class="starters-label"><i class="fa-solid fa-lightbulb"></i> Suggested Prompts:</span>
+                                <div class="chips-row">
+                                    <button class="chip-btn" data-query="What is the main objective and purpose of this project?">
+                                        🎯 Project Objective
+                                    </button>
+                                    <button class="chip-btn" data-query="What AI models, embeddings, and architectures are utilized?">
+                                        🧠 Architecture & Models
+                                    </button>
+                                    <button class="chip-btn" data-query="Summarize the system workflow and key project phases.">
+                                        ⚡ System Workflow
+                                    </button>
+                                    <button class="chip-btn" data-query="What are the key benefits and business impact of this enterprise assistant?">
+                                        📊 Business Impact
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Chat Input Box -->
+                <div class="chat-input-area">
+                    <form id="chatForm" class="chat-form">
+                        <div class="input-wrapper">
+                            <textarea 
+                                id="userQueryInput" 
+                                placeholder="Ask any question about your documents... (Press Enter to send, Shift+Enter for new line)"
+                                rows="1"
+                                autocomplete="off"
+                            ></textarea>
+                            <button type="submit" class="btn btn-primary send-btn" id="btnSend">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Send</span>
+                            </button>
+                        </div>
+                    </form>
+                    <div class="input-footer">
+                        <span><i class="fa-solid fa-shield-halved"></i> Enterprise RAG Index active • High precision vector matching</span>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- API Modal / Drawer -->
+    <div class="modal-backdrop hidden" id="apiModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-code"></i> REST API Documentation</h3>
+                <button class="close-btn" id="btnCloseModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">This enterprise backend provides standard RESTful endpoints for integration into enterprise workflows.</p>
+                
+                <div class="api-endpoint-box">
+                    <div class="endpoint-title"><span class="badge badge-post">POST</span> <code>/process_pdf</code></div>
+                    <p>Uploads a PDF file, extracts text, and indexes chunks into the vector store.</p>
+                    <pre><code>curl -X POST -F "pdf_file=@report.pdf" http://localhost:5000/process_pdf</code></pre>
+                </div>
+
+                <div class="api-endpoint-box">
+                    <div class="endpoint-title"><span class="badge badge-post">POST</span> <code>/summarize_pdf</code></div>
+                    <p>Extracts text and generates a structured summary with key takeaways.</p>
+                    <pre><code>curl -X POST -F "pdf_file=@report.pdf" http://localhost:5000/summarize_pdf</code></pre>
+                </div>
+
+                <div class="api-endpoint-box">
+                    <div class="endpoint-title"><span class="badge badge-post">POST</span> <code>/ask_question</code></div>
+                    <p>Performs semantic similarity retrieval and returns relevant snippets.</p>
+                    <pre><code>curl -X POST http://localhost:5000/ask_question \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is the primary methodology?"}'</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

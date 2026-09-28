@@ -1,0 +1,8 @@
+# Example configuration file for the project.
+embeddings:
+  provider: 'sentence-transformers'  # replace with your choice
+  model: 'all-MiniLM-L6-v2'
+
+summarization:
+  provider: 'google-genai'    # or 'openai', 'hf'
+  api_key: ''                # set env var in production
