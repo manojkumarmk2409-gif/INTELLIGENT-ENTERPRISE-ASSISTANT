@@ -215,4 +215,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-<p align="center">Built with ❤️ by Manojkumar · Powered by open-source AI</p>
+<p align="center">Built with ❤️ by Manojkumar </p>
