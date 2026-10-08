@@ -104,8 +104,8 @@ ollama pull gemma3:latest
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/intelligent-enterprise-assistant.git
-cd intelligent-enterprise-assistant
+git clone https://github.com/manojkumarmk2409-gif/INTELLIGENT-ENTERPRISE-ASSISTANT.git
+cd INTELLIGENT-ENTERPRISE-ASSISTANT
 
 # 2. Create and activate virtual environment
 python -m venv venv
